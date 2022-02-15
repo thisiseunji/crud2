@@ -1,4 +1,3 @@
-import email
 from django.db import models
 
 class Owner(models.Model):
@@ -16,3 +15,4 @@ class Dog(models.Model):
     
     class Meta:
         db_table = 'dogs'
+        
