@@ -64,7 +64,8 @@ class DogsView(View):
                 }
             )
         return JsonResponse({'result':results}, status=200)
-    
+
+###다시해봅시다..?역참조생각해봅시다..?    
 class OwnerAndDogsView(View):
     def get(self, request):
         try:
@@ -94,13 +95,7 @@ class OwnerAndDogsView(View):
                 )
             print(results)            
             return JsonResponse({'result':results}, status= 200)
-
-        except KeyError:
-            return JsonResponse({'result': 'key_error'}, status=400)
-        except ValueError:
-            return JsonResponse({'result': 'value_error'}, status=400)
+         
         except TypeError as e:
             print(e)
             return JsonResponse({'result': 'type_error'}, status=400)
-
-            
