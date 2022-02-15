@@ -7,14 +7,19 @@ from owners.models import Owner, Dog
 
 class OwnersView(View):
     def post(self, request):
-        data      = json.loads(request.body) #json을 dict처럼 쓰려고
-        owner     = Owner.objects.create(
-            name  = data['owner_name'],
-            email = data['owner_email'],
-            age   = data['owner_age']
-        )
-        return JsonResponse({'message':'created'}, status = 201)
-    
+        try:
+            data      = json.loads(request.body) #json을 dict처럼 쓰려고
+            owner     = Owner.objects.create(
+                name  = data['name'],
+                email = data['email'],
+                age   = data['age']
+            )
+            return JsonResponse({'message':'created'}, status = 201)
+        
+        except KeyError:
+            return JsonResponse({'message':'key_error'}, status = 400)
+# http -v GET  http://127.0.0.1:8000/owners   
+
     def get(self, request):
         owners  = Owner.objects.all()
         results = []
@@ -30,14 +35,22 @@ class OwnersView(View):
 
 class DogsView(View):
     def post(self, request):
-        data      = json.loads(request.body)
-        owner     = owner.object.get(id = data['owner_id'])
-        dog       = Dog.objects.create(
-            name  = data['dog_name'],
-            age   = data['dog_age'],
-            owner = owner
-        )
-        return JsonResponse({'message':'created'}, status = 201)
+        try:
+            data      = json.loads(request.body)
+            owner = Owner.objects.get(id = data['owner_id'])
+            dog       = Dog.objects.create(
+                name  = data['name'],
+                age   = data['age'],
+                owner = owner
+            )
+            return JsonResponse({'message':'created'}, status = 201)
+        
+        except KeyError:
+            return JsonResponse({'message':'key_error'}, status = 400)
+        
+        except ValueError:
+            return JsonResponse({'message':'value_error'}, status = 400)
+            
     
     def get(self, request):
         dogs    = Dog.objects.all()
@@ -54,26 +67,40 @@ class DogsView(View):
     
 class OwnerAndDogsView(View):
     def get(self, request):
-        owners  = Owner.objects.all()
-        dogs    = Dog.objects.all()
-        results = []
-        for owner in owners:
-            pet = []
-            for dog in dogs:
-                if owner.id == dog.owner.id:
-                    pet.append(
-                        {
-                            dog.name,
-                            dog.age
-                        }
-                    )    
-            results.append( 
-                {
-                    "name"  : owner.name,
-                    "email" : owner.email,
-                    "age"   : owner.age,
-                    "pet"   : pet
-                    
-                }
-            )        
-        return JsonResponse({'result':results}, status= 200)            
+        try:
+            owners  = Owner.objects.all()
+            print(owners)
+            dogs    = Dog.objects.all()
+            print(dogs)
+            results = []
+            for owner in owners:
+                pet = []
+                for dog in dogs:
+                    if owner.id == dog.owner.id:
+                        pet.append(
+                            {
+                                'name' : dog.name,
+                                'age'  : dog.age
+                            }
+                        )    
+                results.append( 
+                    {
+                        "name"  : owner.name,
+                        "email" : owner.email,
+                        "age"   : owner.age,
+                        "pet"   : pet
+                            
+                    }
+                )
+            print(results)            
+            return JsonResponse({'result':results}, status= 200)
+
+        except KeyError:
+            return JsonResponse({'result': 'key_error'}, status=400)
+        except ValueError:
+            return JsonResponse({'result': 'value_error'}, status=400)
+        except TypeError as e:
+            print(e)
+            return JsonResponse({'result': 'type_error'}, status=400)
+
+            
